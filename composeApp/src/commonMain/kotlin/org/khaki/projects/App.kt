@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.khaki.projects.screen.home.HomeScreen
+import org.khaki.projects.screen.home.TodayTaskListUiState
 
 @Composable
 @Preview
@@ -23,6 +24,9 @@ fun App() {
 //            }
 //        }
         HomeScreen(
+            uiState = TodayTaskListUiState.Success(
+                taskList = emptyList()
+            ),
             onClickNavigationItem = {}
         )
     }

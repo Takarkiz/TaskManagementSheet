@@ -1,12 +1,12 @@
 package org.khaki.projects.screen.home
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,26 +14,43 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.khaki.projects.screen.home.components.TodayTaskList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navigationItem: HomeTab = HomeTab.TODAY,
+    uiState: TodayTaskListUiState,
     onClickNavigationItem: (HomeTab) -> Unit,
 ) {
     Scaffold(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(
+                color = MaterialTheme.colorScheme.background
+            ),
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-                    Text(
-                        text = navigationItem.label
-                    )
+
+                    Column {
+                        Text(
+                            text = navigationItem.label,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Text(
+                            text = "N件のタスク",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
             )
         },
@@ -63,34 +80,46 @@ fun HomeScreen(
         }
     ) { paddingValues ->
 
-        LazyColumn(
+        Box(
             modifier = Modifier
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
 
-            stickyHeader {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = 16.dp,
-                            vertical = 8.dp
-                        )
-                ) {
-                    Text(
-                        text = "今日やること",
-                        style = MaterialTheme.typography.bodyLarge,
+            when (uiState) {
+
+
+                TodayTaskListUiState.Empty -> {
+
+                }
+
+                TodayTaskListUiState.Loading -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
-            }
 
-            items(
-                count = 3,
-            ) {
-                TaskCard(
-                    title = "Task $it"
-                )
+                is TodayTaskListUiState.Success -> {
+                    TodayTaskList(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        taskList = uiState.taskList
+                    )
+                }
+
+                is TodayTaskListUiState.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "取得に失敗しました",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             }
         }
     }
@@ -100,6 +129,7 @@ fun HomeScreen(
 @Composable
 private fun PreviewHomeScreen() {
     HomeScreen(
+        uiState = TodayTaskListUiState.Empty,
         onClickNavigationItem = {},
     )
 }
